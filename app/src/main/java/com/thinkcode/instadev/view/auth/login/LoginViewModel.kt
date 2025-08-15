@@ -28,6 +28,7 @@ class LoginViewModel: ViewModel() {
 
         }
         verifyLogin()
+        //cesarcommittest
     }
 
     private fun verifyLogin() {
