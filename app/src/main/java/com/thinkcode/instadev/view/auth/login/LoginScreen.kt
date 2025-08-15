@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,7 +17,9 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -42,14 +45,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.thinkcode.instadev.R
 import org.w3c.dom.Text
 
 
 @Composable
-fun LoginScreen() {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+fun LoginScreen(loginViewModel: LoginViewModel= viewModel()) {//Lo inicializan para poder hacer testing
+//    var email by remember { mutableStateOf("") }
+//    var password by remember { mutableStateOf("") }
+    val uiState by loginViewModel.uiState.collectAsStateWithLifecycle()
+
     Scaffold(
         Modifier
             .fillMaxSize()
@@ -60,7 +67,9 @@ fun LoginScreen() {
             .background (Color.White)
             .padding(padding)
             .padding(horizontal = 24.dp)
-            .fillMaxSize(),
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()) // <-- hace la columna desplazable
+            .imePadding(),
         horizontalAlignment = Alignment.CenterHorizontally
         ) {
         Text("Español (España)", color = Color.Gray, modifier = Modifier.padding(22.dp))
@@ -75,19 +84,20 @@ fun LoginScreen() {
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(30),
             label = { Text("Usuario, correo electrónico o móvil") },
-            value = email,
-            onValueChange = { email = it })
+            value = uiState.email,
+            onValueChange = { loginViewModel.onEmailChange(it)})
         Spacer(Modifier.height(12.dp))
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(30),
             label = { Text("Contraseña") },
-            value = password,
-            onValueChange = { password = it })
+            value = uiState.password,
+            onValueChange = {loginViewModel.onPasswordChange(it) })
         Spacer(Modifier.height(12.dp))
         Button(
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color.Blue, contentColor = Color.White),
+            enabled = uiState.isLoginEnabled,
             onClick = {}) {
             Text(
                 "Iniciar Sesión",
